@@ -1,3 +1,5 @@
+import ThemeSwitcher from "./ThemeSwitcher";
+
 export default function Navbar() {
   return (
     <div className="navbar bg-base-100">
@@ -64,6 +66,9 @@ export default function Navbar() {
           </li> */}
           <li>
             <a href="/pokemon">Pokemon</a>
+          </li>
+          <li>
+            <ThemeSwitcher />
           </li>
         </ul>
       </div>
