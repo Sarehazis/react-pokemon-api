@@ -1,140 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPokemonData } from "../redux/reducer";
+import { Link } from "react-router-dom";
 
 export default function Pokemon() {
-  const [pokemon, setPokemon] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const dispatch = useDispatch();
+  const {
+    data: pokemon,
+    loading,
+    error,
+  } = useSelector((state) => state.pokemon);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "https://pokeapi.co/api/v2/pokemon?limit=100"
-        );
-        const data = await response.json();
+    dispatch(fetchPokemonData());
+  }, [dispatch]);
 
-        const pokemonDatas = await Promise.all(
-          data.results.map(async (poke) => {
-            const pokeResponse = await fetch(poke.url);
-            return pokeResponse.json();
-          })
-        );
-
-        setPokemon(pokemonDatas);
-        setLoading(false);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleViewDetails = (poke) => {
-    setSelectedPokemon(poke);
-  };
-
-  const handleBackToList = () => {
-    setSelectedPokemon(null);
-  };
-
-  if (loading) {
-    return <div className="text-center text-xl">Loading...</div>;
-  }
-  if (error) {
+  if (loading)
+    return <div className="text-center text-xl text-white">Loading...</div>;
+  if (error)
     return (
-      <div className="text-red-500 text-center text-xl">
-        Error: {error.message}
-      </div>
+      <div className="text-red-500 text-center text-xl">Error: {error}</div>
     );
-  }
-
-  if (selectedPokemon) {
-    return (
-      //   <div className="container mx-auto p-4">
-      //     <button className="btn btn-secondary mb-4" onClick={handleBackToList}>
-      //       Back to List
-      //     </button>
-      //     <div className="card bg-base-200 shadow-xl">
-      //       <figure>
-      //         <img
-      //           src={selectedPokemon.sprites.front_default}
-      //           alt={selectedPokemon.name}
-      //           className="w-32 h-32 mx-auto my-2"
-      //         />
-      //       </figure>
-      //       <div className="card-body">
-      //         <h2 className="card-title">
-      //           {selectedPokemon.name.charAt(0).toUpperCase() +
-      //             selectedPokemon.name.slice(1)}
-      //         </h2>
-      //         <p>Height: {selectedPokemon.height}</p>
-      //         <p>Weight: {selectedPokemon.weight}</p>
-      //         <p>Base Experience: {selectedPokemon.base_experience}</p>
-      //       </div>
-      //     </div>
-      //   </div>
-      <div className="container mx auto p-4 flex justify-center items-center min-h-screen">
-        <button
-          className="btn mb-4 absolute left-10 top-20"
-          onClick={handleBackToList}
-        >
-          Back To List
-        </button>
-        <div className="card bg-base-200 w-96 shadow-xl justify-center items-center">
-          <h1 className="card-title pt-4">Pokemon Details</h1>
-          <figure className="px-10 pt-10">
-            <img
-              style={{ width: "300px", height: "300px" }}
-              src={selectedPokemon.sprites.front_default}
-              alt={selectedPokemon.name}
-              className="rounded-xl"
-            />
-          </figure>
-          <div className="card-body items-center text-center">
-            <h2 className="card-title font-bold text-lg ">
-              {selectedPokemon.name.charAt(0).toUpperCase() +
-                selectedPokemon.name.slice(1)}
-            </h2>
-            <div className="flex justify-center items-center gap-4">
-              <p>Height: {selectedPokemon.height}</p>
-              <p>Height: {selectedPokemon.weight}</p>
-            </div>
-            <div className="flex justify-center items-center">
-              <p>Base Experience: {selectedPokemon.base_experience}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-4">Pokémon List</h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="container mx-auto p-8 bg-gradient-to-b from-gray-900 to-black min-h-screen text-white">
+      <h1 className="text-4xl font-extrabold text-center mb-10 text-white drop-shadow-lg">
+        Pokémon Collection
+      </h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {pokemon.map((poke) => (
-          <div key={poke.name} className="card bg-base-200 shadow-xl">
-            <figure>
+          <div
+            key={poke.name}
+            className="card shadow-lg transform transition duration-300 ease-in-out hover:scale-105 bg-gray-800 rounded-xl overflow-hidden hover:shadow-2xl"
+          >
+            <figure className="p-6 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full mx-auto -mt-10 w-32 h-32 flex items-center justify-center">
               <img
                 src={poke.sprites.front_default}
                 alt={poke.name}
-                className="w-32 h-32 mx-auto my-2"
+                className="w-24 h-24"
               />
             </figure>
-            <div className="card-body">
-              <h2 className="card-title">
-                {poke.name.charAt(0).toUpperCase() + poke.name.slice(1)}
+            <div className="card-body p-6 text-center">
+              <h2 className="card-title text-white text-2xl font-semibold mb-4 capitalize">
+                {poke.name}
               </h2>
-              <button
-                className="btn btn-primary"
-                onClick={() => handleViewDetails(poke)}
+              <Link
+                to={`/pokemon/${poke.id}`}
+                className="btn inline-block border-none bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-200"
               >
                 View Details
-              </button>
+              </Link>
             </div>
           </div>
         ))}
